@@ -6,6 +6,7 @@ import fs from 'fs';
 const PORT = 3000;
 const storedtext = fs.readFileSync('songs.txt').toString();
 const token = "oevAmuh71xZFg1T9WhQfdPPXl4WcbIg1zW52b-NSMF68dO1rliZx8zRdXZUK1yxQ";
+const exportFile = "exported.json"
 
 const server = http.createServer((req,res)=>{
     res.statusCode = 200;
@@ -40,17 +41,25 @@ const get_hit_paths = (rj)=>{
   })
 }
 
-
-
 const scrapper = async (url)=>{
   const data = await get_data(url);
   const $ =  cheerio.load(data);
   const lyrics = $("p").text()
-  return lyrics;
+  return new Object({
+    'url':url,
+    'lyrics':lyrics
+  });
+}
+
+const exportToJSON = (jsonFile) =>{
+  fs.appendFileSync(exportFile,JSON.stringify(jsonFile),"utf-8")
 }
 
 const main_func = async ()=>{
     let tracks = storedtext.split("\n");
+    let scrappedLyrics = {
+      'songs':[]
+    }
 
     let tracks_json = tracks.map((track)=>{
         let [song,artist] = track.split(",")
@@ -64,11 +73,12 @@ const main_func = async ()=>{
       let paths = get_hit_paths(hits);
       for(let p in paths){
         let song_url = "http://genius.com"+paths[p];
-        console.log(song_url)
         const lyrics = await scrapper(song_url)
-        console.log(lyrics)
+        scrappedLyrics.songs.push(lyrics)
       }
     }
+
+    exportToJSON(scrappedLyrics);
 }
 
 
