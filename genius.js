@@ -5,6 +5,7 @@ import fs from 'fs';
 
 const PORT = 3000;
 const storedtext = fs.readFileSync('songs.txt').toString();
+const token = "oevAmuh71xZFg1T9WhQfdPPXl4WcbIg1zW52b-NSMF68dO1rliZx8zRdXZUK1yxQ";
 
 const server = http.createServer((req,res)=>{
     res.statusCode = 200;
@@ -24,14 +25,21 @@ const get_data = async(url)=>{
 }
 
 const get_search_results = async (query)=>{
+  let rj = null
   const uri = encodeURI(query.trim())
-  await fetch("https://api.genius.com/search?q="+ uri +"&access_token=oevAmuh71xZFg1T9WhQfdPPXl4WcbIg1zW52b-NSMF68dO1rliZx8zRdXZUK1yxQ")
+  await fetch("https://api.genius.com/search?q="+ uri +"&access_token="+token)
   .then((res)=>res.json().then((rjson)=>{
-    console.log(rjson)
-}));
-  //return response.json()
+    rj = rjson
+  }));
+  return rj.response.hits
 }
-get_search_results("way 2 sexy drake")
+
+const get_hit_ids = (hits)=>{
+  return hits.map((el)=>{
+    return el.result.id
+  })
+}
+
 
 const scraper = (data)=>{
   const $ =  cheerio.load(data);
@@ -55,17 +63,18 @@ const main_func = async ()=>{
             'artist' :artist
         })
     })
-    for (t in tracks_json){
-      result = await get_search_results(tracks_json[t].song+" "+tracks_json[t].artist)
-
+    for (let t in tracks_json){
+      let hits = await get_search_results(tracks_json[t].song+" "+tracks_json[t].artist);
+      let ids = get_hit_ids(hits);
+      ids.array.forEach(id => {
+        const song_document = "http://api.genius.com/songs/"+id+"&access_token="+token
+      });
       //lyrics = do_that(url)
     }
-    let search_results = await get_search_results()
-
 }
 
 
 
-//main_func()
+main_func()
 
 //do_that()
