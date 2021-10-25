@@ -24,19 +24,19 @@ const get_data = async(url)=>{
   return data;
 }
 
-const get_search_results = async (query)=>{
+const get_results = async (query)=>{
   let rj = null
   const uri = encodeURI(query.trim())
   await fetch("https://api.genius.com/search?q="+ uri +"&access_token="+token)
   .then((res)=>res.json().then((rjson)=>{
     rj = rjson
   }));
-  return rj.response.hits
+  return rj
 }
 
-const get_hit_ids = (hits)=>{
-  return hits.map((el)=>{
-    return el.result.id
+const get_hit_paths = (rj)=>{
+  return rj.response.hits.map((el)=>{
+    return el.result.path
   })
 }
 
@@ -64,17 +64,17 @@ const main_func = async ()=>{
         })
     })
     for (let t in tracks_json){
-      let hits = await get_search_results(tracks_json[t].song+" "+tracks_json[t].artist);
-      let ids = get_hit_ids(hits);
-      ids.array.forEach(id => {
-        const song_document = "http://api.genius.com/songs/"+id+"&access_token="+token
-      });
-      //lyrics = do_that(url)
+      let hits = await get_results(tracks_json[t].song+" "+tracks_json[t].artist);
+      let paths = get_hit_paths(hits);
+      for(let p in paths){
+        let song_url = "http://genius.com"+paths[p];
+        console.log(song_url)
+        const lyrics = await do_that(song_url)
+        console.log(lyrics)
+      }
     }
 }
 
 
 
 main_func()
-
-//do_that()
