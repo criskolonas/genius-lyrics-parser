@@ -41,17 +41,13 @@ const get_hit_paths = (rj)=>{
 }
 
 
-const scraper = (data)=>{
+
+const scrapper = async (url)=>{
+  const data = await get_data(url);
   const $ =  cheerio.load(data);
   const lyrics = $("p").text()
   return lyrics;
 }
-const do_that = async (url)=>{
-  const data = await get_data(url);
-  return scraper(data);
-}
-
-
 
 const main_func = async ()=>{
     let tracks = storedtext.split("\n");
@@ -69,7 +65,7 @@ const main_func = async ()=>{
       for(let p in paths){
         let song_url = "http://genius.com"+paths[p];
         console.log(song_url)
-        const lyrics = await do_that(song_url)
+        const lyrics = await scrapper(song_url)
         console.log(lyrics)
       }
     }
