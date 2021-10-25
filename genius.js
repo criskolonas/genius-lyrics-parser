@@ -24,10 +24,14 @@ const get_data = async(url)=>{
 }
 
 const get_search_results = async (query)=>{
-  const response = await fetch("https://api.genius.com/search?q="+encodeURI(query.trim())+"&access_token=oevAmuh71xZFg1T9WhQfdPPXl4WcbIg1zW52b-NSMF68dO1rliZx8zRdXZUK1yxQ").then((res)=>{console.log(res.json())})
+  const uri = encodeURI(query.trim())
+  await fetch("https://api.genius.com/search?q="+ uri +"&access_token=oevAmuh71xZFg1T9WhQfdPPXl4WcbIg1zW52b-NSMF68dO1rliZx8zRdXZUK1yxQ")
+  .then((res)=>res.json().then((rjson)=>{
+    console.log(rjson)
+}));
   //return response.json()
 }
-get_search_results("way 2 sexy")
+get_search_results("way 2 sexy drake")
 
 const scraper = (data)=>{
   const $ =  cheerio.load(data);
