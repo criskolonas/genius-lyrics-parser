@@ -1,12 +1,25 @@
 import fetch from 'node-fetch';
 import http from 'http'
 import cheerio from 'cheerio';
-import fs from 'fs';
+import fs, { existsSync } from 'fs';
 
 const PORT = 3000;
-const storedtext = fs.readFileSync('songs.txt').toString();
 const token = "oevAmuh71xZFg1T9WhQfdPPXl4WcbIg1zW52b-NSMF68dO1rliZx8zRdXZUK1yxQ";
 const exportFile = "exported.json"
+
+const readSongFile= (filePath)=>{
+    fs.stat(filePath,(err,stat)=>{
+      if(err && err.code === 'ENOENT'){
+        throw ('Could not find songs .txt file.')
+      }
+    })
+    const storedtext = fs.readFileSync(filePath).toString();
+      if(storedtext.length==0){
+        throw ('Songs .txt is empty')
+      }  
+ 
+  return storedtext
+}
 
 const server = http.createServer((req,res)=>{
     res.statusCode = 200;
@@ -52,11 +65,23 @@ const scrapper = async (url)=>{
 }
 
 const exportToJSON = (jsonFile) =>{
+  try{
+    if(!existsSync(exportFile))
+      throw new Error('Did not find export File. Creating one now.')
+  }catch(err){
+      console.log(err)
+  }
+  try{
+    fs.writeFileSync(exportFile,"","utf-8")
+  }catch(err){
+    console.log(err)
+  }
+
   fs.appendFileSync(exportFile,JSON.stringify(jsonFile),"utf-8")
 }
 
-const main_func = async ()=>{
-    let tracks = storedtext.split("\n");
+const initiateTask = async ()=>{
+    let tracks = readSongFile('songs.txt').split("\n");
     let scrappedLyrics = {
       'songs':[]
     }
@@ -79,8 +104,8 @@ const main_func = async ()=>{
     }
 
     exportToJSON(scrappedLyrics);
+    console.log('Task Finished');
 }
 
 
-
-main_func()
+initiateTask()
