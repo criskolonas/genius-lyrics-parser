@@ -102,8 +102,8 @@ const initiateTask = async () => {
       let paths = get_hit_paths(hits);
       for (let p in paths) {
         let song_url = "http://genius.com" + paths[p];
-        const lyrics = await scrapper(song_url)
-        scrappedLyrics.songs.push(lyrics)
+        const lyricObj = await scrapper(song_url)
+        scrappedLyrics.songs.push(lyricObj)
       }
     }
     exportToJSON(scrappedLyrics);
